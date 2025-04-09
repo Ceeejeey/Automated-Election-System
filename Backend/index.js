@@ -1,19 +1,23 @@
 const express = require('express');
-const connectDB = require('./config/db');  // Import the connectDB function
-
 const app = express();
-const PORT = 3000;
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const dotenv = require('dotenv');
+const cors = require('cors');
+
+// Load env vars
+dotenv.config();
 
 // Connect to MongoDB
 connectDB();
 
-// Middleware to parse incoming JSON requests
+// Middlewares
+app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('Server is running!');
-});
+// Routes
+app.use('/api/auth', authRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
