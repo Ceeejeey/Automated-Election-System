@@ -27,7 +27,20 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-  }
+  },
+  // Add this to track votes
+  votedElections: [
+    {
+      election: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Election' 
+      },
+      votedAt: { 
+        type: Date, 
+        default: Date.now 
+      }
+    }
+  ]
 });
 
 const User = mongoose.model('User', userSchema);
