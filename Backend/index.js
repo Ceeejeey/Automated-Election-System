@@ -4,6 +4,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const electionRoutes = require('./routes/electionRoutes')
 const candidateRoutes = require('./routes/candidateRoutes');
+const voteRoutes = require('./routes/voteRoutes');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
@@ -21,6 +22,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/create-election', electionRoutes);
 app.use('/api/create-candidate', candidateRoutes);
+app.use('/api/vote', voteRoutes);
+
 
 
 // Server
