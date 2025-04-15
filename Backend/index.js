@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const electionRoutes = require('./routes/electionRoutes')
 const candidateRoutes = require('./routes/candidateRoutes');
 const voteRoutes = require('./routes/voteRoutes');
+const resultRoutes = require('./routes/resultRoutes'); // Uncomment if you have a result route
 const dotenv = require('dotenv');
 const cors = require('cors');
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/create-election', electionRoutes);
 app.use('/api/create-candidate', candidateRoutes);
 app.use('/api/vote', voteRoutes);
+app.use('/api', resultRoutes); // Uncomment if you have a result route
 
 
 
