@@ -22,8 +22,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/create-election', electionRoutes);
-app.use('/api/create-candidate', candidateRoutes);
+app.use('/api', electionRoutes);
+app.use('/api', candidateRoutes);
 app.use('/api/vote', voteRoutes);
 app.use('/api', resultRoutes); // Uncomment if you have a result route
 

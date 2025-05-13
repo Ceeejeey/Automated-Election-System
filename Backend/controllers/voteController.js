@@ -54,4 +54,28 @@ const castVote = async (req, res) => {
   }
 };
 
-module.exports = { castVote };
+
+const checkVote = async (req, res) => {
+  try {
+    const { userId, electionId } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hasVoted = user.votedElections.some(
+      (vote) => vote.election.toString() === electionId
+    );
+
+    return res.json({ hasVoted });
+  } catch (error) {
+    console.error("Check Vote Error:", error.message);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// Exporting the functions
+
+module.exports = { castVote, checkVote };
