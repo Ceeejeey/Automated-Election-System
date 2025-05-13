@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // Import your admin components
-// import CreateElection from './CreateElection';
+import CreateElection from '../components/CreateElection';
 // import ManageElections from './ManageElections';
 import ApproveVoters from '../components/ApproveVoters';
 // import ViewResults from './ViewResults';
@@ -11,8 +11,8 @@ const AdminDashboard = () => {
 
   const renderComponent = () => {
     switch (activeComponent) {
-      // case 'create':
-      //   return <CreateElection />;
+      case 'create':
+       return <CreateElection />;
       // case 'manage':
       //   return <ManageElections />;
       case 'approve':
