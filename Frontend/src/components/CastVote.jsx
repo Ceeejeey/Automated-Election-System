@@ -102,8 +102,8 @@ const CastVote = () => {
     };
 
     return (
-        <div className="min-w-full bg-white shadow-md rounded-lg overflow-hidden flex items-center justify-center p-8">
-            <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-lg transition-transform ">
+        <div className="min-w-full bg-white shadow-md rounded-lg p-8">
+            
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center tracking-wide">
                     Cast Your Vote 🗳️
                 </h2>
@@ -185,7 +185,7 @@ const CastVote = () => {
                     )}
 
                 </form>
-            </div>
+            
         </div>
     );
 };
