@@ -2,6 +2,12 @@ const User = require('../models/User');
 const Election = require('../models/Election');
 const Candidate = require('../models/Candidate');
 
+// Function to get current time in Sri Lankan timezone
+const getCurrentSriLankanTime = () => {
+  const sriLankanTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" });
+  return new Date(sriLankanTime);
+};
+
 // Vote Casting Logic
 const castVote = async (req, res) => {
   try {
@@ -10,19 +16,23 @@ const castVote = async (req, res) => {
     // Check if the election exists and is active
     const election = await Election.findById(electionId);
     if (!election) {
-      return res.status(404).json({ message: 'Election not found' });
+      return res.status(404).json({ message: "Election not found" });
     }
-    
-    // Check if the election is still ongoing
-    const currentDate = new Date();
+
+    // Get current Sri Lankan time
+    const currentDate = getCurrentSriLankanTime();
+    console.log('Current Sri Lankan Date:', currentDate);
+    console.log('Election Start Date:', election.startDate);
+    console.log('Election End Date:', election.endDate);
+
     if (currentDate < election.startDate || currentDate > election.endDate) {
-      return res.status(400).json({ message: 'Election is not active' });
+      return res.status(400).json({ message: "Election is not active" });
     }
 
     // Check if the user exists
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Check if the user has already voted in this election
@@ -30,13 +40,13 @@ const castVote = async (req, res) => {
       (vote) => vote.election.toString() === electionId.toString()
     );
     if (alreadyVoted) {
-      return res.status(400).json({ message: 'You have already voted in this election' });
+      return res.status(400).json({ message: "You have already voted in this election" });
     }
 
     // Find the candidate the user voted for
     const candidate = await Candidate.findById(candidateId);
     if (!candidate) {
-      return res.status(404).json({ message: 'Candidate not found' });
+      return res.status(404).json({ message: "Candidate not found" });
     }
 
     // Increment the candidate's vote count
@@ -44,17 +54,17 @@ const castVote = async (req, res) => {
     await candidate.save();
 
     // Add this election to the user's votedElections list
-    user.votedElections.push({ election: electionId, votedAt: new Date() });
+    user.votedElections.push({ election: electionId, votedAt: currentDate });
     await user.save();
 
-    res.status(200).json({ message: 'Vote casted successfully', candidate, user });
+    res.status(200).json({ message: "Vote casted successfully", candidate, user });
   } catch (error) {
-    console.error('Vote casting error:', error.message);
-    res.status(500).json({ message: 'Server Error' });
+    console.error("Vote casting error:", error.message);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-
+// Check Vote Logic
 const checkVote = async (req, res) => {
   try {
     const { userId, electionId } = req.body;
@@ -69,7 +79,7 @@ const checkVote = async (req, res) => {
       (vote) => vote.election.toString() === electionId
     );
 
-    return res.json({ hasVoted });
+    res.json({ hasVoted });
   } catch (error) {
     console.error("Check Vote Error:", error.message);
     res.status(500).json({ message: "Server Error" });
@@ -77,5 +87,4 @@ const checkVote = async (req, res) => {
 };
 
 // Exporting the functions
-
 module.exports = { castVote, checkVote };
