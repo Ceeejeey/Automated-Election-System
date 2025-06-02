@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import CreateElection from "../components/CreateElection";
 import ManageElections from '../components/ManageElections';
 import ApproveVoters from "../components/ApproveVoters";
+import ViewResultAdmin from "../components/ViewResultAdmin";
 
 const AdminDashboard = () => {
   const [activeComponent, setActiveComponent] = useState(() => {
@@ -37,6 +38,8 @@ const AdminDashboard = () => {
         return <ManageElections />;
       case "approve":
         return <ApproveVoters />;
+      case "results":
+        return <ViewResultAdmin />;
       default:
         return (
           <div className="text-gray-600 text-lg">

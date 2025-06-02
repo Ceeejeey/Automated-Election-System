@@ -4,9 +4,20 @@ const Candidate = require('../models/Candidate');
 
 // Function to get current time in Sri Lankan timezone
 const getCurrentSriLankanTime = () => {
-  const sriLankanTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" });
-  return new Date(sriLankanTime);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Colombo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+
+  return formatter.format(new Date());
 };
+
 
 // Vote Casting Logic
 const castVote = async (req, res) => {
