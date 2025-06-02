@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import VoterDashboard from './pages/VoterDashboard';
+import CreateElection from './components/CreateElection';
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/voter-dashboard" element={<VoterDashboard />} />
+        <Route path="/create-election" element={<CreateElection />} />
+
         
         {/* Add more routes as needed */}
 
