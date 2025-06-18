@@ -169,7 +169,7 @@ const ViewResultAdmin = () => {
                 >
                     <div className="flex items-center justify-between mb-4 print:justify-start print:flex-col print:items-start">
                         <div>
-                            <h3 className="text-2xl font-bold text-indigo-600">{selectedElection.title}</h3>
+                            <h3 className="text-2xl font-bold text-indigo-600 ">{selectedElection.title}</h3>
                             <p className="text-sm text-gray-500">
                                 {new Date(selectedElection.startDate).toLocaleDateString()} -{" "}
                                 {new Date(selectedElection.endDate).toLocaleDateString()}
@@ -177,10 +177,10 @@ const ViewResultAdmin = () => {
                         </div>
 
                         {/* Hide buttons during print */}
-                        <div className="space-x-2 print:hidden">
+                        <div className="space-x-2 print:hidden ">
                             <button
                                 onClick={() => setViewType(viewType === "graph" ? "table" : "graph")}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md "
                             >
                                 Switch to {viewType === "graph" ? "Table" : "Graph"} View
                             </button>
