@@ -9,35 +9,69 @@ const CastVote = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [hasVoted, setHasVoted] = useState(false);
 
+    const getCurrentSriLankanDate = () => {
+        const formatter = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Colombo",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        });
+
+        const dateParts = formatter.format(new Date()).split("-");
+        return new Date(`${dateParts[0]}-${dateParts[1]}-${dateParts[2]}T00:00:00+05:30`);
+    };
+
+    const convertToSriLankanDate = (utcString) => {
+        const formatter = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Colombo",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        });
+
+        const dateParts = formatter.format(new Date(utcString)).split("-");
+        return new Date(`${dateParts[0]}-${dateParts[1]}-${dateParts[2]}T00:00:00+05:30`);
+    };
+
     useEffect(() => {
         const fetchElections = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("/api/elections", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                const res = await axios.get("/api/elections", {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-                setElections(response.data);
+
+                const now = getCurrentSriLankanDate();
+                console.log("📍 Current Sri Lankan Date:", now.toISOString());
+
+                const ongoing = res.data.filter((election) => {
+                    const start = convertToSriLankanDate(election.startDate);
+                    const end = convertToSriLankanDate(election.endDate);
+
+                    console.log(`🗳️ ${election.title} | Start: ${start.toISOString()} | End: ${end.toISOString()}`);
+
+                    return now >= start && now <= end;
+                });
+
+                console.log("✅ Ongoing elections found:", ongoing.length);
+                setElections(ongoing);
             } catch (error) {
-                console.error("Error fetching elections:", error.message);
+                console.error("❌ Failed to fetch elections:", error.message);
             }
         };
 
         fetchElections();
     }, []);
 
+
     const handleElectionSelect = async (electionId) => {
         setSelectedElection(electionId);
-        setSelectedCandidate(""); // Reset candidate selection when election changes
-        setHasVoted(false); // Reset voting status
-
+        setSelectedCandidate("");
+        setHasVoted(false);
         try {
             const token = localStorage.getItem("token");
             const user = JSON.parse(localStorage.getItem("user"));
             const userId = user?.id;
-
-            // Check if the user has already voted in the selected election
             const voteCheckResponse = await axios.post(
                 "/api/vote/check",
                 { userId, electionId },
@@ -49,8 +83,6 @@ const CastVote = () => {
             );
 
             setHasVoted(voteCheckResponse.data.hasVoted);
-
-            // Fetch candidates
             const response = await axios.get(`/api/elections/${electionId}/candidates`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -62,8 +94,8 @@ const CastVote = () => {
         }
     };
 
-    const handleVote = async (e) => {
-        e.preventDefault();
+    const handleVote = async (eventData) => {
+        eventData.preventDefault();
 
         if (!selectedElection || !selectedCandidate) {
             alert("Please select both an election and a candidate.");
@@ -75,7 +107,6 @@ const CastVote = () => {
             const token = localStorage.getItem("token");
             const user = JSON.parse(localStorage.getItem("user"));
             const userId = user?.id;
-
             const voteData = {
                 userId,
                 candidateId: selectedCandidate,
@@ -92,10 +123,10 @@ const CastVote = () => {
             setSelectedElection("");
             setSelectedCandidate("");
             setCandidates([]);
-            setHasVoted(true); // Update the voting status
+            setHasVoted(true);
         } catch (error) {
             console.error("Error casting vote:", error.message);
-            alert("Failed to cast vote.");
+            alert("Failed to cast vote");
         } finally {
             setIsLoading(false);
         }
@@ -103,58 +134,54 @@ const CastVote = () => {
 
     return (
         <div className="min-w-full bg-white shadow-md rounded-lg p-8">
-            
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center tracking-wide">
-                    Cast Your Vote 🗳️
-                </h2>
-
-                <form onSubmit={handleVote} className="space-y-6">
-                    {/* Election Selection */}
-                    <div className="space-y-2">
-                        <label className="block text-gray-600 font-medium">Select Election</label>
-                        <select
-                            value={selectedElection}
-                            onChange={(e) => handleElectionSelect(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg"
-                        >
-                            <option value="" disabled>
-                                -- Select Election --
-                            </option>
+                
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                        Cast Your Vote 🗳️
+                    </h2>
+                    <div className="mb-8">
+                        <h3 className="text-lg font-semibold text-gray-700 mb-4">Select an Election</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {elections.length > 0 ? (
                                 elections.map((election) => (
-                                    <option key={election._id} value={election._id}>
-                                        {election.title}
-                                    </option>
+                                    <div
+                                        key={election._id}
+                                        onClick={() => handleElectionSelect(election._id)}
+                                        className={`p-6 rounded-xl cursor-pointer transform transition-all duration-300 ${selectedElection === election._id
+                                                ? "bg-indigo-600 text-white shadow-lg scale-105"
+                                                : "bg-gray-50 hover:bg-indigo-50 hover:shadow-md"
+                                            }`}
+                                    >
+                                        <h4 className="text-xl font-semibold">{election.title}</h4>
+                                        <p className={`text-sm ${selectedElection === election._id ? "text-indigo-100" : "text-gray-500"}`}>
+                                            {election.description || "Participate in this election"}
+                                        </p>
+                                    </div>
                                 ))
                             ) : (
-                                <option disabled>No Elections Available</option>
+                                <p className="text-gray-500 col-span-2 text-center">No ongoing elections available.</p>
                             )}
-                        </select>
+                        </div>
                     </div>
-
-                    {/* Candidate Selection */}
                     {selectedElection && (
-                        <div className="space-y-2 mt-4">
-                            <label className="block text-gray-600 font-medium">Select Candidate</label>
-                            <div className="space-y-3">
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Select a Candidate</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {candidates.length > 0 ? (
                                     candidates.map((candidate) => (
                                         <div
                                             key={candidate._id}
-                                            className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition ${selectedCandidate === candidate._id
-                                                    ? "bg-blue-100 border-blue-400"
-                                                    : "bg-gray-50 hover:bg-gray-100 border-gray-300"
-                                                }`}
                                             onClick={() => setSelectedCandidate(candidate._id)}
+                                            className={`p-6 rounded-xl cursor-pointer transform transition-all duration-300 ${selectedCandidate === candidate._id
+                                                    ? "bg-blue-100 border-2 border-blue-500 shadow-lg scale-105"
+                                                    : "bg-gray-50 hover:bg-blue-50 hover:shadow-md border border-gray-200"
+                                                }`}
                                         >
-                                            <div>
-                                                <h3 className="text-lg font-medium text-gray-800">{candidate.name}</h3>
-                                                <p className="text-gray-500 text-sm">{candidate.party}</p>
-                                            </div>
+                                            <h4 className="text-xl font-semibold text-gray-900">{candidate.name}</h4>
+                                            <p className="text-sm text-gray-500">{candidate.party}</p>
                                             <div
-                                                className={`px-3 py-1 rounded-lg text-sm font-semibold ${selectedCandidate === candidate._id
-                                                        ? "bg-blue-400 text-white"
-                                                        : "bg-gray-300 text-gray-600"
+                                                className={`mt-2 px-3 py-1 rounded-full text-sm font-semibold ${selectedCandidate === candidate._id
+                                                        ? "bg-blue-500 text-white"
+                                                        : "bg-gray-200 text-gray-600"
                                                     }`}
                                             >
                                                 {selectedCandidate === candidate._id ? "Selected" : "Select"}
@@ -162,31 +189,28 @@ const CastVote = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-gray-500">No candidates available for this election.</p>
+                                    <p className="text-gray-500 col-span-2 text-center">No candidates available for this election.</p>
                                 )}
                             </div>
                         </div>
                     )}
-
-                    {/* Submit Button */}
                     {selectedElection && (
-                        <div className="flex justify-end mt-6">
+                        <div className="flex justify-center mt-8">
                             <button
-                                type="submit"
-                                className={`py-2 px-8 rounded-lg transition-shadow shadow-lg focus:outline-none focus:ring-2 ${hasVoted
-                                        ? "bg-green-500 text-white block w-full cursor-not-allowed focus:ring-green-400"
-                                        : "bg-blue-500 hover:bg-blue-600 text-white focus:ring-blue-400"
-                                    }`}
+                                onClick={handleVote}
+                                className={`py-3 px-8 rounded-full text-lg font-semibold transition-all duration-300 ${hasVoted
+                                        ? "bg-green-500 text-white cursor-not-allowed shadow-md"
+                                        : "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg"
+                                    } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                                 disabled={isLoading || hasVoted}
                             >
                                 {isLoading ? "Submitting..." : hasVoted ? "Already Voted ✅" : "Cast Vote"}
                             </button>
                         </div>
                     )}
-
-                </form>
+                </div>
             
-        </div>
+        
     );
 };
 
